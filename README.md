@@ -196,6 +196,7 @@
 - - Yes: Short-circuit functions below
 
 | Description | Function Names |
+|---|---|
 |Add, remove, update fields|Eval, lookup|
 |Find & replace, sed-like, obfuscate, redact, hash|Mask|
 |Add GeoIP info|GeoIP|
