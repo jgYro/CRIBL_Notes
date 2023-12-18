@@ -147,3 +147,65 @@
 - - Drop: Drop events addressed to that Destination
 - - Queue: Queue events to that Destination (Persistent Queuing)
 - Default behavior is Block
+
+## Routes
+
+### Types
+- QuickConnect: Visually connect Stream Sources to output Destination via drag-n-drop
+- Routes: Completely configure data through Stream by defining a series of filter expressions to process the event
+- - Direct data to Pipelines
+- - Evaluate incoming events against filters
+- - Each Route can be associated with ony one Pipeline and one output
+- - Routes default with 'Final flag' set to Yes
+- - Evaluated in order
+- - List of filters used to find a matching pipeline and a destination to send events to:
+- - - Filters: js expressions (truthy/falsy)
+- - - Routes are evaluated in order: Top > Down
+- - Final Toggle:
+- - - Yes: matching events with by consumed by Route & not evaluated against any other Routes below it
+- - - No: clones of matching events will be processed by the configured pipeline. The original events will continue down the rest of the Routes
+- - Can accept data from multiple sources, but each route can be associated with only one pipeline & destination
+
+### Route Strategies
+- Most-specific first or most-general first
+- Minimize the number of filters/Routes an event gets evaluated against
+- Examples:
+- - If cloning is not needed at all, start with the broadest expression at the top, to consume as many events as early as possible
+- - If cloning is needed on narrow set of events, do that upfront, then follow it with a Route that consumes those clones immediately after
+
+### Route Groups
+- Routes can be moved up and down the Route stack together
+- UI only: Routes in a group still maintain their global position order
+
+## Pipelines
+- List of functions that process events
+- Events always move in the direction that points outside of the system
+- Functions are evaluated in order: Top > Down
+- Different pipeline "types"
+- - Pre-processing
+- - Post-processing
+- - Main-processing
+
+### Functions
+- Building blocks of pipelines
+- Discrete processing on an event
+- Javascript
+- Work only on events that match their filter condition
+- Final Toggle:
+- - No: Pass resulting events down
+- - Yes: Short-circuit functions below
+
+| Description | Function Names |
+|Add, remove, update fields|Eval, lookup|
+|Find & replace, sed-like, obfuscate, redact, hash|Mask|
+|Add GeoIP info|GeoIP|
+|Extract Fields|Regex Extract, Parser|
+|Extract Timestamps|Auto Timestamp|
+|Drop Events|Drop, Regex Filter, Sampling, Suppress, Dynamic Sampling|
+|Sample events (e.g., high-volume, low-value data)|Sampling, Dynamic Sampling|
+|Suppress events (e.g., duplicates)|Suppress|
+|Serialize / change format (e.g., convert JSON to CSV)|Serialize|
+|Convert JSON arrays or XML elements into own events|Unroll, JSON Unroll, XML Unroll|
+|Flatten nested structures (e.g., nested JSON)|Flatten|
+|Aggregate events in real-time (i.e., statistical aggregations)|Aggregate|
+|Convert events in metrics format|Publish Metrics|
