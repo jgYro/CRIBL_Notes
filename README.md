@@ -210,3 +210,50 @@
 |Flatten nested structures (e.g., nested JSON)|Flatten|
 |Aggregate events in real-time (i.e., statistical aggregations)|Aggregate|
 |Convert events in metrics format|Publish Metrics|
+
+### Cribl Stream Packs
+- Pre-built configurations: simplify the deployments & use of Stream product
+- Improve time to value: provides out of box configs
+- Enable plug & play dpeloyments for specific use cases
+- Allows medium/large deployments sharing configs & content across multiple worker groups
+- https://packs.cribl.io
+- Allows ability to quickly allow troubleshooting by ease of replicating setup
+
+### Event Model
+- Events: key-value pairs
+- Fields that start with a double underscore are Cribl internal fields "__inputId"
+- If an event cannot be JSON-parsed, all of its content will be assigned to field "_raw"
+- If timestamp is not configured, the current time in UNIX epoch will be assigned to "_time"
+
+### Processing Order
+1. Sources: Data arrives from external providers
+2. Custom command processor: External command consumes the data via stdin, processes it, and sends its output via stdout
+3. Event breakers: Break up incoming bytestreams into discrete events
+4. Fields/metadata: Add fields to each incoming event; Similar to Eval function
+5. Input conditioning pipeline: Pre-prcess (normalize) data from this input before it reaches the Routes
+6. Routes: Map incoming events to Processing Pipelines and Destinations
+7. Processing pipelines: Events transformations via series of Fuctions
+8. Output conditioning pipeline: Post-prcess (normalize) data to each destination
+9. Destinations: Each Route/pipeline combination forwards processed data out to a destination
+
+### Javascript Expressions
+- JS Expressions are valid units of code that resolve to a value
+- Every syntactically valid expression resolves to some value, but conceptually, there are two types of expressions:
+- - Assign value to a variable: 
+- - - ```x = 42```
+- - - ```newFoo = foo.slice(30)```
+- - Evaluate to a value
+- - - ```(Math.random() * 42)```
+- - - ```3 + 4```
+- - - ```'foobar'```
+- - - ```42```
+
+### Filters
+- Used in:
+- - Routes: to select a stream of the data flow
+- - Functions: to scope or narrow down the applicabilty of the function
+- Filters are expressions that must evaluate to either true (or truthy) or false (or falsy)
+- - Truthy: true, 42, -42, 3.14, "foo", Infinity, -Infinity
+- - Falsy: false, null, undefined, 0, Nan, '', ""
+- Example:
+- - ```source.endsWith('.log') || type=='vpcflow'```
