@@ -253,6 +253,9 @@
 - - Routes: to select a stream of the data flow
 - - Functions: to scope or narrow down the applicabilty of the function
 - Filters are expressions that must evaluate to either true (or truthy) or false (or falsy)
+- Example:
+- - ```source.endsWith('.log') || type=='vpcflow'```
+
 |Truthy|Falsy|
 |---|---|
 |true|false|
@@ -262,11 +265,4 @@
 |"foo"|Nan|
 |Infinity|''|
 |-Infinity|""|
- 
- 
- 
- 
- 
- 
-- Example:
-- - ```source.endsWith('.log') || type=='vpcflow'```
+
