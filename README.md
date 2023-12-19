@@ -218,6 +218,7 @@
 - Allows medium/large deployments sharing configs & content across multiple worker groups
 - https://packs.cribl.io
 - Allows ability to quickly allow troubleshooting by ease of replicating setup
+- Work at worker group level in distributed deployment
 
 ### Event Model
 - Events: key-value pairs
@@ -266,3 +267,88 @@
 |Infinity|''|
 |-Infinity|""|
 
+### Value Expressions
+- Values expressions are typically used in Functions to assign a value to a new field
+- Examples:
+- - ```hour = Math.floor(_time/3600)```
+- - ```index = host.endsWith('.internal') ? '_internal': 'main'```
+- - ```location = 'New York, NY'```
+
+### Data Samples
+- Samples are files containing a set of events that can be replayed and previewed while authoring pipelines and configurations:
+- - Uploaded (attached)
+- - Pasted
+- - Captured
+- - - Can have live captures after any pipelines
+- - - 4 capture points, save captures as Sample files and replay later as needed
+
+### Datagens
+- Enables users to generate sample data to troubleshoot
+- Datagen template files ship with Stream
+- Tempaltes can be created from a sample or capture
+- Datagens are managed similarly to data sources
+
+### Replay
+- cribl steam deployment between log source and analysis system allows:
+- - Data to be archived in a cheap storage mechanism for retention
+- - Ability to "reply it"
+- Simultaneously routes a full fidelity copy of the data to low-cost object storage
+- Can point to data store and replay it back
+- Received data can then be routed to an existing or new analytics system or system
+
+### Knowledge Resources
+
+| Resource | Description |
+|---|---|
+|Lookups|Data tables Stream uses to enrich events as they are processed by the Lookup Function|
+|Event Breaker Rules|Rulesets are collections of Event Breaker rules that are associated with Sources|
+|Parsers|Definitions and configurations leveraged by the Parser Function|
+|Global Variables|Reusable JavaScript expressions that can be accessed in Functions in any Pipeline|
+|Regexes|Regex Library that continas a set of pre-built common regex patterns|
+|Grok Patterns|Grok Patterns library that contains a set of pre-built common patterns, organized as files|
+|Schemas|JSON definitions that are used to match (validate) JSON events|
+
+#### Lookups
+- Enrich with lookup table or csv
+- Allows to look up from field in data with a field in another csv
+- Supported Formats:
+- - CSV, Gzip, mmdb
+- Adding Files:
+- - Upload
+- - Create
+
+#### Event Breaker Rulesset
+- Break incoming data into multiple events
+- Event breaker types
+- - Regex, File header, JSON array, JSON New line, Delimited, Timestamp, CSV
+
+#### Parsers
+- Extract fields from events or reserialize
+- Parser Types
+- - CSV, Common log format, Ext log file format, key-value pairs, JSON object, Delimited value
+
+#### Global Variables
+- Resusable javascript expressions
+
+#### Regex Library
+- Repository of regex patterns; SSN, Zip code, email, etc
+
+#### Grok Patterns
+- Advanced Grok patterns
+
+#### Schemas
+- Validating JSON
+- rules based on validation
+
+#### Parquet Schemas
+- Used for large data, performant
+- Good with compression
+
+#### Database Connections
+- MySQL
+- SQL
+- Postgres
+
+#### AppScope Config
+- What events to collect
+- Which protocols to monitor
