@@ -253,7 +253,7 @@
 - - Routes: to select a stream of the data flow
 - - Functions: to scope or narrow down the applicabilty of the function
 - Filters are expressions that must evaluate to either true (or truthy) or false (or falsy)
-| Truthy | Falsy |
+|Truthy|Falsy|
 |---|---|
 |true|false|
 |42|null|
