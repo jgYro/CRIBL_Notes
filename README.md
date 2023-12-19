@@ -253,7 +253,20 @@
 - - Routes: to select a stream of the data flow
 - - Functions: to scope or narrow down the applicabilty of the function
 - Filters are expressions that must evaluate to either true (or truthy) or false (or falsy)
-- - Truthy: true, 42, -42, 3.14, "foo", Infinity, -Infinity
-- - Falsy: false, null, undefined, 0, Nan, '', ""
+| Truthy | Falsy |
+|---|---|
+|true|false|
+|42|null|
+|-42|undefined|
+|3.14|0|
+|"foo"|Nan|
+|Infinity|''|
+|-Infinity|""|
+ 
+ 
+ 
+ 
+ 
+ 
 - Example:
 - - ```source.endsWith('.log') || type=='vpcflow'```
