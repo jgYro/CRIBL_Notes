@@ -211,7 +211,7 @@
 |Aggregate events in real-time (i.e., statistical aggregations)|Aggregate|
 |Convert events in metrics format|Publish Metrics|
 
-### Cribl Stream Packs
+## Cribl Stream Packs
 - Pre-built configurations: simplify the deployments & use of Stream product
 - Improve time to value: provides out of box configs
 - Enable plug & play dpeloyments for specific use cases
@@ -219,6 +219,8 @@
 - https://packs.cribl.io
 - Allows ability to quickly allow troubleshooting by ease of replicating setup
 - Work at worker group level in distributed deployment
+
+## Processing
 
 ### Event Model
 - Events: key-value pairs
@@ -316,7 +318,7 @@
 - - ```index = host.endsWith('.internal') ? '_internal': 'main'```
 - - ```location = 'New York, NY'```
 
-### Data Samples
+## Data Samples
 - Samples are files containing a set of events that can be replayed and previewed while authoring pipelines and configurations:
 - - Uploaded (attached)
 - - Pasted
@@ -338,7 +340,7 @@
 - Can point to data store and replay it back
 - Received data can then be routed to an existing or new analytics system or system
 
-### Knowledge Resources
+## Knowledge Resources
 
 | Resource | Description |
 |---|---|
@@ -391,9 +393,7 @@
 - SQL
 - Postgres
 
-#### AppScope Config
-- What events to collect
-- Which protocols to monitor
+## Admin Course
 
 ### Git
 
@@ -409,3 +409,206 @@
 |git log|history of commits|
 |git rm/mv|deletes files from or move files around repo|
 |git checkout|switch to a branch, pull fiels from other branches into working directory|
+
+### Git in Stream
+- Creates local git repo in of the following locations
+- - $CRIBL_VOLUME_DIR
+- - Cribl Stream Install directory($CRIBL_HOME)
+- Commit button executes:
+- - ```git add``` on changed files
+- - ```git commit``` to sync changes to the local repo (HEAD)
+- ```git log``` provides full view of changes to with Cribl Stream audit log
+- Stream can push and pull changes to/from remote repo
+- Requires Enterprise License
+- Connect each Stream instance to a different branch in the same repo
+
+### Architecture Options
+- Deployment Options
+- - Singles instances
+- - Worker processes
+- - Distributed deployment
+- Stream Components
+- - Leaders 
+- - Workers
+- - Worker Groups
+- Cloud Deployments
+- - SaaS
+- - Hybrid
+
+### Leader High Availability
+- If primary leaders fials, becomes unresponse:
+- - Leader HA selects new leader
+- - All current state and metrics stored
+- - Default Cribl.Cloud service
+
+### Stream Leader
+- In distrbuted Deployment
+- Gui & REST access
+- Authentication & enforcement of RBAC
+- Worker configuration - pull-based only
+- Work Queue (discovery & collection jobs)
+- Holding State (certain pull sources)
+- Supports Disaster Recovery services
+
+### Stream Workers
+- Pulls configuration from Leader
+- Reports metrics to Leader
+- Receives from push-based source
+- Collects from pull-based source
+- Colector jobs
+- Pushes results to destinations
+- Handles all data processing
+- HA discussion
+
+### Workers & Worker Groups
+- Worker Process: A process within a Single Instance, or within Worker Nodes, that handles data inputs, processing and output
+- Worker Node: An instance running as a managed worker, whose configuration is fully managed by the Leader Node
+- Worker Group: A colelction of Worker Nodes that share the same configuration
+
+### Distributed Deployment Architecture
+- Leader Node: An instance running in Leader mode, used to centrally author configurations and monitor a distrbuted deployment
+- Mapping Ruleset: An ordered list of Filters, used to map Workers to Worker Groups
+
+### Topologies
+- One Leader, One Worker Group
+- - Small deployment
+- - Serving single department
+- - Spanning single location
+- One Leader, Multiple Worker Group
+- - Supports larger deployment
+- - Serving mulitple departments
+- - Spanning mulitple locations
+- - Enable a global footprint
+- Worker Group to Worker Group
+- - Compression, up to 90 percent
+- - Secure Communication
+- - Consolidated View
+- Configuration: Remote Data Center
+- - Source: Key value pairs
+- - Route: Key value pairs to JSON
+- - Destination: TCP JSON / Auth Token / Compression
+- Configuration: HQ Data Center
+- - Source: TCP JSON / Auth Token
+- - Route: Any Data Shaping Required
+- - Destination: Splunk
+
+### Worker Groups
+- A set of worker nodes that share the same configuration
+- Organization with on-prem workloads plus cloud workers:
+- - Create data center worker group and a cloud worker group
+- Organization with multiple data centers:
+- - Set worker groups with unique configurations per location
+- Organization with widely variable workloads:
+- - Dedicated worker groups for different sources
+
+### Worker Processes
+- Worker processes operate in parallel
+- Data in a single connection will be handled by a single worker process
+- Data should over multiple connections
+- - It's better to have 5 connections to TCP 514, each bringing in 200gb/day, than one connection at 1tb/day
+- Each worker process will maintain & manage its own outputs
+- - If an instance with 4 worker processes is configured with a Splunk output, the the Splunk destination will see 4 inbound connections
+
+### Worker Mappings: Rule Sets
+- Map workers to worker groups
+- List of rules that evaluate filter expressions on workers' heartbeat payloads
+- Order matters > filter supports full js expressions
+- Ruleset matching strategy is first-match
+- One worker to one worker group
+- At least one worker group should be defined & present in the system
+- Only one mapping ruleset can be active at any one time
+
+### Worker Process: Load Balancing
+- Uses Node.js cluster module
+- Uses round-robin process
+- Stateless, if one fails, sends to next available process
+- Worker node spans worker processes distributes incoming TCP connections
+- Load Balance out to 120 indexers
+- - Uses Time & Volume
+
+### What Affects Performance Sizing
+- Performance
+- - Event Breaker Ruleset
+- - Number of Routes
+- - Number of Pipelines
+- - Number of Clones
+- - Health of destinations
+- - Persistent Queueing
+
+### Sizing by Processor
+- Cribl guidelines assume that 1 physical core is equivalent to:
+- - 2 Virtual/hyperthread CPUs (cCPUs) on Intel/Xeon or AMD processorZ
+- - - vCPU vs CPU vs Core: hyperthreading
+- - - 200 gb/vCPU overall throughput - at 3.0 ghz
+- - - Sustained CPU rate vs burst rate
+- - 1 (higher-throughput) vCPU on Graviton2/Arm64 processors
+- - - Same general considerations as intel
+- - - Throughput in excess of 200gb per core overall
+- - - ARM is generally less expensive
+- Allocate 1 physical core for each 4--gb/day of in+out throughput
+- - Sum is estimated input & output volume, divide by 400gb
+- - 100gb in -> 100gb out to each of 3 destinations = 400gb total == 1 core
+- - 3tb in -> 1tb out = 4tb = 10 physical cores
+- - 4tb in -> full 4tb to destination A, 2tb to destination b = 10tb total = 25 physical cores
+
+### Leader Node Sizing: Recommended
+- OS: Linux: RedHat, CentOS, Ubuntu, AWS Linux, Suse (64bit)
+- System: CPU 4 physical cores (1 physical core assumed equivalent to 2 virtual cpu's), Ram 8gb, disk 5gb free
+- Tasks:
+- - Configuration authroing & tracking 
+- - Monitoring & dashboards
+- - Diganostics/log search
+- - Scheduling & state tracking
+
+### Worker Node Sizing: Recommended
+- OS: Linux: RedHat, CentOS, Ubuntu, AWS Linux, Suse (64bit)
+- System: CPU 8 physical cores (1 physical core assumed equivalent to 2 virtual cpu's), Ram 32gb (min 8gb), disk 5gb free
+- Tasks:
+- - Handle data ingress
+- - Handle data processing
+- - Handle data egress
+
+### Remote Repo
+- System Down
+- Install Git on Backup Node
+- Recover config from remote repo
+- Restart Leader Node
+- Back operational
+
+### Recover Process: Commands
+- Install Cribl
+- git init
+- git remote add origin <git repo .git>
+- git fetch origin
+- git reset --hard origin/leader
+- git show --abrev-commit
+- start Stream Leader
+
+### Stream CLI Basics
+|Command|Function|
+|---|---|
+|```./cribl help -a```|Show help information|
+|```./cribl start```|Start Cribl Stream|
+|```./cribl stop```|stop Cribl Stream|
+|```./cribl restart```|restart Cribl Stream|
+|```./cribl status```|Show Cribl Stream status|
+|```./cribl mode-edge```|Configures Cribl Edge as a single single-instance deployment|
+|```./cribl mode-managed-edge```|Configures Cribl Edge as an Edge Node|
+|```./cribl mode-master```|Configures Cribl Stream as a Leader instance|
+|```./cribl mode-single```|Configures Cribl Stream as a single-instance deployment|
+|```./cribl mode-worker```|Configures Cribl Stream as a worker instance|
+|```./cribl pack <sub-command> <options> <args>```|Manage Cribl Packs|
+|```./cribl diag <sub-command> <options> <args>```|Manages diagnostic bundles|
+|```./cribl diag create -d```|Create Cribl Stream diagnostic bundle in debug mode|
+|```./cribl diag diag send -o```|Send Cribl Stream diagnostic bundle to Cribl Support|
+|```./cribl diag list```|List existing Cribl Stream/Edge diagnostic bundles|
+
+### Diagnostic Bundle Contents
+- Folders:
+- - default: Contians all the aPacks installed as well as .yml config files
+- - local: Same as default but contains the changes made to Cribl Stream
+- - log: Contains log files including access.log, audit.log, cribl.log, notifications.log, ui-access.log, etc
+- - state: Contains the state of the system
+- - system.json: Contains information about the state of the system running Cribl Stream
+- - groups: This directory will appear if you ahve worker groups configured
+- - - This folder will have the same folder strcture as above since it is a diag for each worker group
