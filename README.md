@@ -249,6 +249,48 @@
 - - - ```'foobar'```
 - - - ```42```
 
+### Javascript Comparison Expressions
+- By default, Javascript evaluate operators form left to right, in order of precedence
+- ```!``` not
+- ```&&``` and
+- ```||``` or
+- ```==``` (equal value)
+- - ```5 == 5 ```(true)
+- - ```5 == 4 ```(false)
+- ```===``` (equal value AND equal type)
+- - ```5 == 5 ```(true)
+- - ```5 == "5" ```(false)
+- ```!=``` (not equal)
+- - ```5 != 4 ```(true)
+- - ```5 != 5 ```(false)
+- ```!==``` (not equal value AND equal type)
+- - ```5 !== 4 ```(true)
+- - ```5 !== "4" ```(false)
+- ```>``` (greater than)
+- - ```5 > 4 ```(true)
+- - ```4 > 5 ```(false)
+- ```<``` (less than)
+- - ```4 < 5 ```(false)
+- - ```5 < 4 ```(true)
+- ```>=``` (greater than or equal)
+- - ```5 >= 4 ```(true)
+- - ```5 >= 5 ```(true)
+- ```<=``` (less than or equal)
+- - ```4 <= 5 ```(true)
+- - ```4 <= 4 ```(true)
+
+### Javascript Methods
+- ```.startsWith```
+- - Returns ```true``` if a string starts with the specified string
+- ```.endsWith```
+- - Returns ```true``` if a string ends with the specified string
+- ```.includes```
+- - Returns ```true``` if a string contains with the specified string
+- ```.match```
+- - Returns an ```array``` containing the results if the string matches with a regex
+- ```.indexOf```
+- - Returns the position of the first occurrence of the substring
+
 ### Filters
 - Used in:
 - - Routes: to select a stream of the data flow
@@ -352,3 +394,18 @@
 #### AppScope Config
 - What events to collect
 - Which protocols to monitor
+
+### Git
+
+|Git Command|function|
+|---|---|
+|git init|start or re-initialize a repo|
+|git add|stages the current state of files|
+|git commit|bundles changes > moves them into HEAD|
+|git push/pull|syncs local and remote repos|
+|git diff|differences between files in repo and files in cwd|
+|git status|files that have changed, been added or are untracked|
+|git stash|"stash" local changes|
+|git log|history of commits|
+|git rm/mv|deletes files from or move files around repo|
+|git checkout|switch to a branch, pull fiels from other branches into working directory|
