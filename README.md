@@ -696,3 +696,90 @@
 |C.Text|Text functions|
 |C.vars|Global variables|
 |C.version|Cribl Stream version|
+
+### TLS
+1. A private key created via openssl or similar
+2. Using a priv key, a public key is created and embedded in a Certificate Signing Request(CSR)
+3. The CSR is signed, either by it's own key or a CA's key
+4. The cert now has a priv key
+
+- A cert cannot exist without being signed
+- Public key (in signed cert) can encrypt/verify data
+- Private key can decrypt/sign data
+- Caveat: Entity posessing the priv key may not be the rightful owner
+
+### Certificate Authorities (CAs)
+- CAs are used to sign Cert Signing Requests
+- Public vs Private - depends on need
+- The first/top-level CA is the root -> assertion of trust
+- The second CA is a subordinate/intermediate - optional but best practice
+
+### Self-Signed Certificates
+- Signed by entity whose identity it certifies
+- Every root CA cert is self-signed
+- Every self-signed cert is also a root but not necessarily a CA
+- Still provides confidientiality, but authenticity and data integrity are suspect
+- CA-signed certs mitigates these issues
+- One step further is having the CA root cert deemed a trusted root by applications
+
+### Level of trust
+- Self-signed certs
+- Private CA-signed certs
+- Public CA-signed certs
+- CA-signed certs whereby the CA is deemed trusted
+
+### Certificate Chains
+- Chains exist when a non-self-signed certificate is involved
+- Many public CAs use chains to protect their root certs
+- Frequently used within organizations handling their own signing
+- Validating chains - start at the bottom and moves up the chain to the root
+
+### KMS (Key Management Service) Overview
+- Cribl Stream encrypts secrets stored on disk
+- The keys used for encryption (cribl.secret) are managed by KMS
+- The keys are unique to each WOrker Group + Leader
+- Encryption key can be managed by Cribl Stream or by an external KMS
+- Secrets encrypted by the key:
+- - Sensitive information stored in configs
+- - Data encryption keys stored as configs
+
+### Stream Cert Validations
+- Configuring settigns as a TLS server:
+- - Authenticate Client (mutual auth) - if true, server requests client cert.
+- - - Off by default
+- - Validate Client - Clients whose certs aren't authorized have connections denied
+- - Mutual auth enables optional CN validation via regex
+- Leaf cert expiration and validation of CA chain then:
+- - CN / SAN checks RFCs
+- - - Only one is checked, regardless of no matches. SAN checked first, if values exist
+- - - IPs are only accepted if they are in both SAN and Subject Attributes
+- Stream as a client can validate the remote server cert using "Validate server certs" toggle
+- Some destinations allow rejecting unauthorized (self-signed certs)
+- If GUI does not provide a Reject Unauthoried toggle, then a global one can be used
+- - Requires a restart
+- - Must be included in systemd unit file
+
+### Trace
+- Traces represent the end to end request flow through a distributed system
+- The data structure of traces look almost like an event log
+- Traces are made up of spans
+- - traceid
+- - name
+- - id
+
+### Leader Node Logs
+- API/main process in $CRIBL_HOME/log/ directory
+
+|Logfile name|Description|Equivalent on LOGS PAGE|
+|---|---|---|
+|```cribl.log```|Principal log in Cribl Stream. Includes telemetry/license-validation logs. Corresponds to top-level ```cribl.log``` on Diag page|```Leader > API Process```|
+|```access.log```|API calls, e.g., ```GET /api/v1/version/info```|```Leader > Access```|
+|```audit.log```|Actions pertaining to files e.g., ```create```, ```update```, ```commit```, ```deploy```, ```delete```|```Leader > Audit```|
+|```notifications.log```|Messages that appear in the notification list in the UI|```Leader > Notifications```|
+|```ui-acess.log```|Interactions with different UI components described as URLs, e.g., ```/settings/apidocs```, ```/dashboard/logs```|```Leader > Notifications```|
+
+- Config Helper process in $CRIBL_HOME/log/group/GROUPNAME directory
+
+|Logfile name|Description|Equivalent on LOGS PAGE|
+|---|---|---|
+|```cribl.log```|Messages about config maintenance, previews, etc|```GROUPNAME > Config helper```|
