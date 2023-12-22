@@ -783,3 +783,94 @@
 |Logfile name|Description|Equivalent on LOGS PAGE|
 |---|---|---|
 |```cribl.log```|Messages about config maintenance, previews, etc|```GROUPNAME > Config helper```|
+
+
+- API process in $CRIBL_HOME/log/ directory
+
+|Logfile name|Description|Equivalent on LOGS PAGE|
+|---|---|---|
+|```cribl.log```|Messages about the worker communicating with the Leader node and other API requests e.g., sending metrics, reaping job artifacts|```N/A```|
+
+
+- Worker Process in $CRIBL_HOME/log/worker/[wp#]/
+
+|Logfile name|Description|Equivalent on LOGS PAGE|
+|---|---|---|
+|```cribl.log```|Messages about the worker processing data|```N/A```|
+
+### Upgrade Sequence
+- Single Instance
+- - Upgrade the instance
+- Distributed Deployment
+- - Upgrade the leader
+- - Upgrade the workers
+- - commit & deploy
+
+### Prearing for an upgrade
+- Default files will be overwritten
+- Customs functions: move to ```$CRIBL_HOME/local/cribl/functions/```
+
+### Manual Upgrade Steps for Single Instance
+- Stop Stream
+- Back up $CRIBL_HOME
+- Uncompress new version over the old one
+- Start Stream
+- Validate your Stream environment
+
+### Manual Upgrade Steps for Distributed Deployment
+- Commit & deploy
+- Ugprade the Leader Node (Worker nodes can continue running)
+- - Stop Stream
+- - Back up $CRIBL_HOME
+- - Uncompress new version over the old one
+- - Start Stream
+- - Validate your Stream environment
+- Upgrade the Worker Node
+- - Wait for all the workers to report the leader
+- - Stop
+- - Uncompress new version over the old one
+- - Start Stream
+- Commit new software version changes
+- - Ensure that all workers have reported with new version
+- - Commit & deploy after verifying all workers are upgrade
+
+### GitOps
+- Need dev server and prod
+- dev branch and prod branch
+- Can specify whether or not prod/dev data can be sent
+1. Make changes in Dev system
+2. Commit & push changes to remote repo
+3. Create pull request
+4. Merge Pull request
+5. CI/CD makes api to cribl stream
+
+## Top Challenges
+
+### Privilege Ports
+- Do not run Cribl as root
+- Cannot access ports 1-1024
+- On a POSIX linux system run the following:
+- - ```setcap cap_net_bind_service=+ep $CRIBL_HOME/bin/cribl```
+- - Will need ran on every ugprade
+
+### Too many open files
+- Do not used high cardinality fields in the expression
+- Configure max open files option
+- LimitNoFILE=2048 in SystemD file
+
+### OOM out of memory errors
+- shown in cribl_stderr.log, gets overwritten on system startups
+- Memory limits can be configured
+
+### Cloning Workers
+- Do not duplicate GUID, as they should be unique
+- Remove .dat file in ```$CRIBL_HOME/local/cribl/auth```
+- Regenerated on each run
+
+### Resetting Lost Password
+- Cribl.secdret file is located at ```$CRIBL_HOME/local/cribl/auth/cribl.secret```
+- To manualy add, change or restore a pw, replace affected user's passwd k/v pair with a password key in the following format:
+- - ```"password":"<newPlaintet>"```
+
+### Pipeline Profiling
+- Review metrics and problematic functions
