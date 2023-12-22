@@ -612,3 +612,87 @@
 - - system.json: Contains information about the state of the system running Cribl Stream
 - - groups: This directory will appear if you ahve worker groups configured
 - - - This folder will have the same folder strcture as above since it is a diag for each worker group
+
+### Key Settings: Pull Sources
+- Poll Interval: Specifies in min how often to scrape target by metrics
+- Leader node required: Determines whether leader node is required
+- Discovery Phase: When worker nodes discover what info is available
+- Collection Phase: Collection jobs may be paginated, so multiple jobs may occur
+
+### Additional Source Details
+- Source Persistent Queuing
+- - Implemented on outbound side, meaning each source can take advantage of a destination's queue
+- - Some push sources have build-in buffer to handle Cribl Stream Backpressure
+- - - Without buffering > Cribl SPQ required
+- - - With limited in memory buffering > Cribl SPQ recommended
+- - - With ability to buffer on Disk > Cribl SPQ not needed
+- - TLS
+- - - A TLS connection is when certs, keys CA chains and cipher suites all come together
+
+### Stream Sources: Balancing Push
+- Data pushed to Stream will need to be balanced across the worker nodes
+- Some senders have load balancing built-in
+- Open protocols will usually require a load balancing appliance/application
+- - Syslog
+- - HEC
+
+### Stream Sources: No new agents
+- Re-using already installed agents removes key barrier to entry
+
+### RBAC
+- Roles: Logical entities that are associated with one or multiple policies (groups of permissions)
+- - Reader all role: For read-only/auditor type role created by default as needed
+- Policies: A set of permissions that provide access or perform an action on a specific Cribl Stream object or objects
+- Permissions: Access rights to navigate to, change or delete
+- Users: Roles are mapped to Cribl stream users
+
+
+### Stream Sources: Live Capture
+- All sources can be captured live "off the wire" to serve as validation of delivery and testing rulesets
+- Live feedback on changes before deployment
+- Capture any samples at any point in the process
+
+### Collectors
+- Stream Colelctors that are designed to ingest data intermittently rather than continuously
+- Collector can be ran scheduled or ad-hoc basis
+- Support the following data types:
+- - Azure Blob, Google Cloud Storage, REST, S3, Splunk Search, Health Check, Database, File System, Script
+
+### Single Deployment Worker Node Collector Job
+- Prepare the infrastructure to execute a collection job
+- Discovers the data to be fetched
+- Fetches the data that match the run filter
+- Passes the results either through the Routes or into a specific pipeline
+
+### Distributed Deployment Worker Node Collector Job
+- Collectors are configured per worker group
+- Leader node kicks off job for worker group
+- Worker node execute the tasks to its entirety
+- Leader node oversees the task distribution and tries to maintain balance across jobs
+- Cribl Stream uses "Least-In-Flight Scheduling"
+- Suppression or aggregation not possible due to "Share nothing" structure of processes
+- - Need redis/similar app to perform stateful suppresion and stateful aggregation
+
+### Stream to Stream
+- Helps with slow connections
+- Compression
+- Encrypted via TCP JSON
+
+### Cribl Expression Methods
+
+|Cribl Expression|Function|
+|---|---|
+|C.Crypto|Data Encryptoin and Decryptoin Functions|
+|C.Decode|Data decoding functions|
+|C.Encode|Data encoding functions|
+|C.env|Environment functions|
+|C.Lookup|Inline lookup functions|
+|C.Mask|Data masking functions|
+|C.Misc|Miscellaneous Utility fucntions|
+|C.Net|Network functions|
+|C.Os|System Functions|
+|C.Schema|Schema functions|
+|C.Secret|Secrets-management functions|
+|C.Text|Text functions|
+|C.vars|Global variables|
+|C.version|Cribl Stream version|
